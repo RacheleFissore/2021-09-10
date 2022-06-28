@@ -6,6 +6,8 @@ package it.polito.tdp.yelp;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+
+import it.polito.tdp.yelp.model.Business;
 import it.polito.tdp.yelp.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -17,6 +19,7 @@ import javafx.scene.control.TextField;
 public class FXMLController {
 	
 	private Model model;
+	private boolean entrato = false;
 
     @FXML // ResourceBundle that was given to the FXMLLoader
     private ResourceBundle resources;
@@ -37,31 +40,62 @@ public class FXMLController {
     private TextField txtX2; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbCitta"
-    private ComboBox<?> cmbCitta; // Value injected by FXMLLoader
+    private ComboBox<String> cmbCitta; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbB1"
-    private ComboBox<?> cmbB1; // Value injected by FXMLLoader
+    private ComboBox<Business> cmbB1; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbB2"
-    private ComboBox<?> cmbB2; // Value injected by FXMLLoader
+    private ComboBox<Business> cmbB2; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtResult"
     private TextArea txtResult; // Value injected by FXMLLoader
     
     @FXML
     void doCreaGrafo(ActionEvent event) {
-    	
+    	if(cmbCitta.getValue() != null) {
+    		entrato = true;
+    		txtResult.clear();
+    		cmbB1.setValue(null);
+        	model.creaGrafo(cmbCitta.getValue());
+        	txtResult.appendText("Grafo creato con " + model.getNVertici() + " vertici e " + model.getNArchi() + " archi\n\n");
+        	cmbB1.getItems().addAll(model.getVertici());
+        	cmbB2.getItems().addAll(model.getVertici());
+    	}
     }
 
     @FXML
     void doCalcolaLocaleDistante(ActionEvent event) {
-
+    	txtResult.clear();
+    	
+    	if(entrato) {
+    		if(cmbB1.getValue() != null) {
+    			txtResult.appendText(model.getLocaleDistante(cmbB1.getValue()));
+    		}
+    		else {
+    			txtResult.appendText("Selezionare il locale");
+    		}	
+    	} else {
+			txtResult.appendText("Creare prima il grafo");
+		}
     	
     }
 
     @FXML
     void doCalcolaPercorso(ActionEvent event) {
-
+    	txtResult.clear();
+    	
+    	if(entrato) {
+    		if(cmbB1.getValue() != null && cmbB2.getValue() != null) {
+    			try {
+					int n = Integer.parseInt(txtX2.getText());
+					txtResult.appendText(model.trovaSequenza(cmbB1.getValue(), cmbB2.getValue(), n));
+				} catch (NumberFormatException e) {
+					throw e;
+				}
+    			
+    		}
+    	}
     }
 
 
@@ -80,5 +114,7 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	
+    	cmbCitta.getItems().addAll(model.getCity());
     }
 }
